@@ -11,33 +11,42 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   var tempo = 135;
+  Timer? timer;
   late var tempoFormatado = formatarTempo();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Center(child: Text(tempoFormatado),),
-          ElevatedButton(onPressed: (){
-            iniciarContagem();
-          }, child: const Text("Iniciar"),),
-        ],
-      )
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Center(child: Text(tempoFormatado),),
+            ElevatedButton(onPressed: (){
+              iniciarEPausarContagem();
+            }, child: timer == null ? const Text("Iniciar") : const Text("Pausar"),),
+          ],
+        )
     );
   }
 
-  void iniciarContagem(){
-    if(tempo > 0){
-      Timer.periodic(Duration(seconds: 1), (timer) {
-        tempo--;
-        setState(() {
-          tempoFormatado = formatarTempo();
-        });
+  void iniciarEPausarContagem(){
+    if(timer != null){
+      timer!.cancel();
+      timer = null;
+    }else{
+      timer = Timer.periodic(Duration(seconds: 1), (timer) {
+        if( tempo > 0) {
+          tempo--;
+          setState(() {
+            tempoFormatado = formatarTempo();
+          });
+        }
       });
     }
+
+    setState(() {
+    });
   }
 
   String formatarTempo(){
