@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
@@ -10,6 +11,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  var tempoController = TextEditingController();
   var tempo = 135;
   Timer? timer;
   late var tempoFormatado = formatarTempo();
@@ -17,6 +19,36 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        appBar: AppBar(),
+        drawer: Drawer(
+          child: SafeArea(
+            child: Column(
+              children: [
+                Text("Config"),
+                Row(
+                  children: [
+                    Text("Tempo"),
+                    Expanded(child: TextField(
+                      controller: tempoController,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    ),),
+                  ],
+                ),
+                ElevatedButton(onPressed: (){
+                  setState(() {
+                    tempo = int.parse(tempoController.text)*60;
+                    tempoFormatado = formatarTempo();
+                  });
+                  if(timer != null){
+                    iniciarEPausarContagem();
+                  }
+                  Navigator.pop(context);
+                }, child: Text("Salvar"),),
+              ],
+            ),
+          ),
+        ),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
