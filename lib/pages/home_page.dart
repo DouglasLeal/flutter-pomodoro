@@ -11,10 +11,26 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  var tempoController = TextEditingController();
-  var tempo = 135;
+  var pomodoroController = TextEditingController();
+  var pausaCurtaController = TextEditingController();
+  var pausaLongaController = TextEditingController();
+
+  var pomodoroTempo = 60;
+  var pausaCurtaTempo = 60;
+  var pausaLongaTempo = 60;
+
   Timer? timer;
+  late var tempo = pomodoroTempo;
   late var tempoFormatado = formatarTempo();
+
+  @override
+  void initState() {
+    super.initState();
+
+    pomodoroController.text = (pomodoroTempo ~/ 60).toString();
+    pausaCurtaController.text = (pausaCurtaTempo ~/ 60).toString();
+    pausaLongaController.text = (pausaLongaTempo ~/ 60).toString();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,9 +43,29 @@ class _HomePageState extends State<HomePage> {
                 Text("Config"),
                 Row(
                   children: [
-                    Text("Tempo"),
+                    Text("Pomodoro"),
                     Expanded(child: TextField(
-                      controller: tempoController,
+                      controller: pomodoroController,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    ),),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Text("Pausa Curta"),
+                    Expanded(child: TextField(
+                      controller: pausaCurtaController,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    ),),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Text("Pausa Longa"),
+                    Expanded(child: TextField(
+                      controller: pausaLongaController,
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     ),),
@@ -37,7 +73,9 @@ class _HomePageState extends State<HomePage> {
                 ),
                 ElevatedButton(onPressed: (){
                   setState(() {
-                    tempo = int.parse(tempoController.text)*60;
+                    pomodoroTempo = int.parse(pomodoroController.text)*60;
+                    pausaCurtaTempo = int.parse(pausaCurtaController.text)*60;
+                    pausaLongaTempo = int.parse(pausaLongaController.text)*60;
                     tempoFormatado = formatarTempo();
                   });
                   if(timer != null){
