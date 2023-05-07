@@ -20,6 +20,8 @@ class _HomePageState extends State<HomePage> {
   var pausaLongaTempo = 60;
 
   Timer? timer;
+  var contagemPausas = 0;
+
   late var tempo = pomodoroTempo;
   late var tempoFormatado = formatarTempo();
 
@@ -44,45 +46,62 @@ class _HomePageState extends State<HomePage> {
                 Row(
                   children: [
                     Text("Pomodoro"),
-                    Expanded(child: TextField(
-                      controller: pomodoroController,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    ),),
+                    Expanded(
+                      child: TextField(
+                        controller: pomodoroController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                      ),
+                    ),
                   ],
                 ),
                 Row(
                   children: [
                     Text("Pausa Curta"),
-                    Expanded(child: TextField(
-                      controller: pausaCurtaController,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    ),),
+                    Expanded(
+                      child: TextField(
+                        controller: pausaCurtaController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                      ),
+                    ),
                   ],
                 ),
                 Row(
                   children: [
                     Text("Pausa Longa"),
-                    Expanded(child: TextField(
-                      controller: pausaLongaController,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    ),),
+                    Expanded(
+                      child: TextField(
+                        controller: pausaLongaController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                      ),
+                    ),
                   ],
                 ),
-                ElevatedButton(onPressed: (){
-                  setState(() {
-                    pomodoroTempo = int.parse(pomodoroController.text)*60;
-                    pausaCurtaTempo = int.parse(pausaCurtaController.text)*60;
-                    pausaLongaTempo = int.parse(pausaLongaController.text)*60;
-                    tempoFormatado = formatarTempo();
-                  });
-                  if(timer != null){
-                    iniciarEPausarContagem();
-                  }
-                  Navigator.pop(context);
-                }, child: Text("Salvar"),),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      pomodoroTempo = int.parse(pomodoroController.text) * 60;
+                      pausaCurtaTempo =
+                          int.parse(pausaCurtaController.text) * 60;
+                      pausaLongaTempo =
+                          int.parse(pausaLongaController.text) * 60;
+                      tempoFormatado = formatarTempo();
+                    });
+                    if (timer != null) {
+                      //iniciarEPausarContagem();
+                    }
+                    Navigator.pop(context);
+                  },
+                  child: Text("Salvar"),
+                ),
               ],
             ),
           ),
@@ -91,37 +110,44 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Center(child: Text(tempoFormatado),),
-            ElevatedButton(onPressed: (){
-              iniciarEPausarContagem();
-            }, child: timer == null ? const Text("Iniciar") : const Text("Pausar"),),
+            Center(
+              child: Text(tempoFormatado),
+            ),
+            timer == null ? button("Iniciar", iniciarContagem) : button("Pausar", pausarContagem),
           ],
-        )
-    );
+        ));
   }
 
-  void iniciarEPausarContagem(){
-    if(timer != null){
-      timer!.cancel();
-      timer = null;
-    }else{
-      timer = Timer.periodic(Duration(seconds: 1), (timer) {
-        if( tempo > 0) {
-          tempo--;
-          setState(() {
-            tempoFormatado = formatarTempo();
-          });
-        }
-      });
-    }
-
-    setState(() {
+  void iniciarContagem() {
+    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (tempo > 0) {
+        tempo--;
+        setState(() {
+          tempoFormatado = formatarTempo();
+        });
+      }
     });
+
+    setState(() {});
   }
 
-  String formatarTempo(){
+  void pausarContagem() {
+    timer!.cancel();
+    timer = null;
+
+    setState(() {});
+  }
+
+  String formatarTempo() {
     var minutos = tempo ~/ 60;
     var segundos = tempo % 60;
     return "${minutos.toString().padLeft(2, '0')}:${segundos.toString().padLeft(2, '0')}";
   }
+}
+
+Widget button(String texto, Function fn) {
+  return ElevatedButton(
+    onPressed: (){fn();},
+    child: Text(texto),
+  );
 }
