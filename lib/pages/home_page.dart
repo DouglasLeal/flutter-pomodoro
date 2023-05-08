@@ -15,14 +15,15 @@ class _HomePageState extends State<HomePage> {
   var pausaCurtaController = TextEditingController();
   var pausaLongaController = TextEditingController();
 
-  var pomodoroTempo = 60;
-  var pausaCurtaTempo = 60;
-  var pausaLongaTempo = 60;
+  var pomodoroTempo = 5;
+  var pausaCurtaTempo = 6;
+  var pausaLongaTempo = 7;
 
   Timer? timer;
   var contagemPausas = 0;
+  var momentoPomodoro = false;
 
-  late var tempo = pomodoroTempo;
+  late var tempo;
   late var tempoFormatado = formatarTempo();
 
   @override
@@ -32,6 +33,8 @@ class _HomePageState extends State<HomePage> {
     pomodoroController.text = (pomodoroTempo ~/ 60).toString();
     pausaCurtaController.text = (pausaCurtaTempo ~/ 60).toString();
     pausaLongaController.text = (pausaLongaTempo ~/ 60).toString();
+
+    prepararPomodoro();
   }
 
   @override
@@ -96,7 +99,7 @@ class _HomePageState extends State<HomePage> {
                       tempoFormatado = formatarTempo();
                     });
                     if (timer != null) {
-                      //iniciarEPausarContagem();
+                      pausarContagem();
                     }
                     Navigator.pop(context);
                   },
@@ -125,6 +128,19 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           tempoFormatado = formatarTempo();
         });
+      }else{
+        pausarContagem();
+        if(momentoPomodoro){
+          if(contagemPausas > 3){
+            contagemPausas = 0;
+            prepararPausaLonga();
+          }else{
+            contagemPausas++;
+            prepararPausaCurta();
+          }
+        }else{
+          prepararPomodoro();
+        }
       }
     });
 
@@ -135,6 +151,27 @@ class _HomePageState extends State<HomePage> {
     timer!.cancel();
     timer = null;
 
+    setState(() {});
+  }
+
+  void prepararPomodoro(){
+    tempo = pomodoroTempo;
+    tempoFormatado = formatarTempo();
+    momentoPomodoro = true;
+    setState(() {});
+  }
+
+  void prepararPausaCurta(){
+    tempo = pausaCurtaTempo;
+    tempoFormatado = formatarTempo();
+    momentoPomodoro = false;
+    setState(() {});
+  }
+
+  void prepararPausaLonga(){
+    tempo = pausaLongaTempo;
+    tempoFormatado = formatarTempo();
+    momentoPomodoro = false;
     setState(() {});
   }
 
