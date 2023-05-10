@@ -15,13 +15,14 @@ class _HomePageState extends State<HomePage> {
   var pausaCurtaController = TextEditingController();
   var pausaLongaController = TextEditingController();
 
-  var pomodoroTempo = 5;
-  var pausaCurtaTempo = 6;
-  var pausaLongaTempo = 7;
+  var pomodoroTempo = 900;
+  var pausaCurtaTempo = 300;
+  var pausaLongaTempo = 900;
 
   Timer? timer;
   var contagemPausas = 0;
   var momentoPomodoro = false;
+  Color? corBackground;
 
   late var tempo;
   late var tempoFormatado = formatarTempo();
@@ -30,86 +31,50 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
 
-    pomodoroController.text = (pomodoroTempo ~/ 60).toString();
-    pausaCurtaController.text = (pausaCurtaTempo ~/ 60).toString();
-    pausaLongaController.text = (pausaLongaTempo ~/ 60).toString();
-
+    apresentarTemposNoTextField();
     prepararPomodoro();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: corBackground,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
           foregroundColor: Colors.black,
+          actions: [
+            TextButton(onPressed: () { reiniciar(); },
+            child: const Icon(Icons.refresh, color: Colors.black,),)
+          ],
         ),
         drawer: Drawer(
           child: SafeArea(
-            child: Column(
-              children: [
-                Text("Config"),
-                Row(
-                  children: [
-                    Text("Pomodoro"),
-                    Expanded(
-                      child: TextField(
-                        controller: pomodoroController,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Text("Pausa Curta"),
-                    Expanded(
-                      child: TextField(
-                        controller: pausaCurtaController,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Text("Pausa Longa"),
-                    Expanded(
-                      child: TextField(
-                        controller: pausaLongaController,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      pomodoroTempo = int.parse(pomodoroController.text) * 60;
-                      pausaCurtaTempo =
-                          int.parse(pausaCurtaController.text) * 60;
-                      pausaLongaTempo =
-                          int.parse(pausaLongaController.text) * 60;
-                      tempoFormatado = formatarTempo();
-                    });
-                    if (timer != null) {
-                      pausarContagem();
-                    }
-                    Navigator.pop(context);
-                  },
-                  child: Text("Salvar"),
-                ),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  txt("Config", fontSize: 32.0),
+                  timeInput("Pomodoro", pomodoroController),
+                  timeInput("Pausa Curta", pausaCurtaController),
+                  timeInput("Pausa Longa", pausaLongaController),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        pomodoroTempo = int.parse(pomodoroController.text) * 60;
+                        pausaCurtaTempo =
+                            int.parse(pausaCurtaController.text) * 60;
+                        pausaLongaTempo =
+                            int.parse(pausaLongaController.text) * 60;
+                        tempoFormatado = formatarTempo();
+                      });
+                      reiniciar();
+                      Navigator.pop(context);
+                    },
+                    child: Text("Salvar"),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -118,9 +83,16 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Center(
-              child: Text(tempoFormatado),
+              child: Text(
+                tempoFormatado,
+                style: const TextStyle(
+                  fontSize: 120,
+                ),
+              ),
             ),
-            timer == null ? button("Iniciar", iniciarContagem) : button("Pausar", pausarContagem),
+            timer == null
+                ? button("Iniciar", iniciarContagem)
+                : button("Pausar", pausarContagem),
           ],
         ));
   }
@@ -132,17 +104,17 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           tempoFormatado = formatarTempo();
         });
-      }else{
+      } else {
         pausarContagem();
-        if(momentoPomodoro){
-          if(contagemPausas > 3){
+        if (momentoPomodoro) {
+          if (contagemPausas > 3) {
             contagemPausas = 0;
             prepararPausaLonga();
-          }else{
+          } else {
             contagemPausas++;
             prepararPausaCurta();
           }
-        }else{
+        } else {
           prepararPomodoro();
         }
       }
@@ -152,31 +124,47 @@ class _HomePageState extends State<HomePage> {
   }
 
   void pausarContagem() {
-    timer!.cancel();
-    timer = null;
+    if(timer != null){
+      timer!.cancel();
+      timer = null;
+    }
 
     setState(() {});
   }
 
-  void prepararPomodoro(){
+  void reiniciar(){
+    pausarContagem();
+    prepararPomodoro();
+  }
+
+  void prepararPomodoro() {
     tempo = pomodoroTempo;
     tempoFormatado = formatarTempo();
     momentoPomodoro = true;
+    corBackground = Colors.redAccent;
     setState(() {});
   }
 
-  void prepararPausaCurta(){
+  void prepararPausaCurta() {
     tempo = pausaCurtaTempo;
     tempoFormatado = formatarTempo();
     momentoPomodoro = false;
+    corBackground = Colors.blueAccent;
     setState(() {});
   }
 
-  void prepararPausaLonga(){
+  void prepararPausaLonga() {
     tempo = pausaLongaTempo;
     tempoFormatado = formatarTempo();
     momentoPomodoro = false;
+    corBackground = Colors.greenAccent;
     setState(() {});
+  }
+
+  void apresentarTemposNoTextField() {
+    pomodoroController.text = (pomodoroTempo ~/ 60).toString();
+    pausaCurtaController.text = (pausaCurtaTempo ~/ 60).toString();
+    pausaLongaController.text = (pausaLongaTempo ~/ 60).toString();
   }
 
   String formatarTempo() {
@@ -188,7 +176,42 @@ class _HomePageState extends State<HomePage> {
 
 Widget button(String texto, Function fn) {
   return ElevatedButton(
-    onPressed: (){fn();},
-    child: Text(texto),
+    onPressed: () {
+      fn();
+    },
+    style: ButtonStyle(),
+    child: Text(
+      texto,
+      style: const TextStyle(
+        fontSize: 40,
+      ),
+    ),
+  );
+}
+
+Widget txt(texto, {fontSize = 16.0}){
+  return Text(texto, style: TextStyle(fontSize: fontSize),);
+}
+
+Widget timeInput(texto, controller){
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    crossAxisAlignment: CrossAxisAlignment.end,
+    children: [
+      txt(texto),
+      SizedBox(
+        width: 170,
+        child: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly
+          ],
+          decoration: const InputDecoration(
+            suffix: Text("min"),
+          ),
+        ),
+      ),
+    ],
   );
 }
